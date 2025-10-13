@@ -1,7 +1,15 @@
-"scripts": {
-  "dev": "vite",
-  "build": "vite build",
-  "preview": "vite preview",
-  "predeploy": "npm run build",
-  "deploy": "gh-pages -d dist"
+{
+  "name": "my-web3-platform",
+  "version": "0.0.0",
+  "homepage": "https://Ruslan865.github.io/my-web3-platform",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
+  },
+  "devDependencies": {
+    "gh-pages": "^5.0.0"
+  }
 }
