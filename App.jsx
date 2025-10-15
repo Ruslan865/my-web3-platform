@@ -1,58 +1,72 @@
-import { useState, useEffect } from 'react'
-import { ethers } from 'ethers'
+import React, { useState, useEffect } from "react";
+import { ethers } from "ethers";
 
 function App() {
-  const [accounts, setAccounts] = useState([]) // iki hesab üçün array
-  const [balances, setBalances] = useState([])
+  const [account, setAccount] = useState(null);
+  const [balance, setBalance] = useState(null);
 
+  // MetaMask-ə qoşulma funksiyası
   const connectWallet = async () => {
-    if (window.ethereum) {
+    if (typeof window.ethereum !== "undefined") {
       try {
-        const accs = await window.ethereum.request({ method: 'eth_requestAccounts' })
-        setAccounts(accs.slice(0, 2)) // yalnız iki hesab götür
+        const accounts = await window.ethereum.request({
+          method: "eth_requestAccounts",
+        });
+        setAccount(accounts[0]);
       } catch (err) {
-        console.error('User denied account access', err)
+        console.error("User rejected the request:", err);
       }
     } else {
-      alert('Please install MetaMask!')
+      alert("Please install MetaMask!");
     }
-  }
+  };
 
-  const getBalances = async (accs) => {
-    if (window.ethereum && accs.length > 0) {
-      const provider = new ethers.providers.Web3Provider(window.ethereum)
-      const bals = await Promise.all(accs.map(async (acc) => {
-        const bal = await provider.getBalance(acc)
-        return ethers.utils.formatEther(bal)
-      }))
-      setBalances(bals)
+  // Balansı alma funksiyası
+  const getBalance = async (accountAddress) => {
+    try {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const balance = await provider.getBalance(accountAddress);
+      setBalance(ethers.utils.formatEther(balance));
+    } catch (err) {
+      console.error(err);
     }
-  }
+  };
 
+  // Hesab dəyişəndə balansı yenilə
   useEffect(() => {
-    if (accounts.length > 0) {
-      getBalances(accounts)
+    if (account) {
+      getBalance(account);
     }
-  }, [accounts])
+  }, [account]);
 
   return (
-    <div style={{ padding: '2rem', fontFamily: 'Arial', backgroundColor: '#f5f5f5', minHeight: '100vh' }}>
-      <h1>Qoşa Pul Kisəsi</h1>
+    <div style={{ padding: "2rem", fontFamily: "Arial, sans-serif" }}>
+      <h1>My Web3 Platform</h1>
+
       <button
         onClick={connectWallet}
-        style={{ padding: '1rem', fontSize: '16px', cursor: 'pointer', marginBottom: '1rem' }}
+        style={{
+          padding: "0.5rem 1rem",
+          fontSize: "1rem",
+          cursor: "pointer",
+          marginTop: "1rem",
+        }}
       >
-        {accounts.length > 0 ? 'Connected' : 'Connect Wallet'}
+        {account ? account.substring(0, 6) + "..." : "Connect Wallet"}
       </button>
 
-      {accounts.length > 0 && accounts.map((acc, idx) => (
-        <div key={acc} style={{ marginTop: '1rem', padding: '1rem', border: '1px solid #ccc', borderRadius: '8px', backgroundColor: '#fff' }}>
-          <p>Ethereum Account: {acc}</p>
-          <p>Balance: {balances[idx] || 'Loading...'} ETH</p>
+      {account && (
+        <div style={{ marginTop: "1rem" }}>
+          <p>
+            <strong>Account:</strong> {account}
+          </p>
+          <p>
+            <strong>Balance:</strong> {balance ? balance + " ETH" : "Loading..."}
+          </p>
         </div>
-      ))}
+      )}
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
